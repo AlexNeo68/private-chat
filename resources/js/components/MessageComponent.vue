@@ -66,6 +66,16 @@ export default {
   },
   created() {
     this.getChats();
+    Echo.private(`Chat.${this.friend.session.id}`).listen(
+      "PrivateChatEvent",
+      (e) => {
+        this.chats.push({
+          message: e.chat.message.content,
+          type: e.chat.type,
+          send_at: "just now",
+        });
+      }
+    );
   },
   methods: {
     async getChats() {

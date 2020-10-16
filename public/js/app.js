@@ -2187,11 +2187,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   created: function created() {
+    var _this = this;
+
     this.getChats();
+    Echo["private"]("Chat.".concat(this.friend.session.id)).listen("PrivateChatEvent", function (e) {
+      _this.chats.push({
+        message: e.chat.message.content,
+        type: e.chat.type,
+        send_at: "just now"
+      });
+    });
   },
   methods: {
     getChats: function getChats() {
-      var _this = this;
+      var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
         var res;
@@ -2201,11 +2210,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context.prev = 0;
                 _context.next = 3;
-                return axios.get("/sessions/".concat(_this.friend.session.id, "/chats"));
+                return axios.get("/sessions/".concat(_this2.friend.session.id, "/chats"));
 
               case 3:
                 res = _context.sent.data;
-                _this.chats = res.data;
+                _this2.chats = res.data;
                 _context.next = 10;
                 break;
 
@@ -2223,7 +2232,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     send: function send() {
-      var _this2 = this;
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var res;
@@ -2233,21 +2242,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context2.prev = 0;
                 _context2.next = 3;
-                return axios.post("/sessions/".concat(_this2.friend.session.id, "/chats"), {
-                  content: _this2.message,
-                  userTo: _this2.friend.id
+                return axios.post("/sessions/".concat(_this3.friend.session.id, "/chats"), {
+                  content: _this3.message,
+                  userTo: _this3.friend.id
                 });
 
               case 3:
                 res = _context2.sent.data;
 
-                _this2.chats.push({
-                  message: _this2.message,
+                _this3.chats.push({
+                  message: _this3.message,
                   type: 0,
                   send_at: "just now"
                 });
 
-                _this2.message = null;
+                _this3.message = null;
                 _context2.next = 11;
                 break;
 

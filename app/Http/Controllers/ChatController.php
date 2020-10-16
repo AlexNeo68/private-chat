@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PrivateChatEvent;
 use App\Http\Resources\ChatResource;
 use App\Models\Session;
 use Illuminate\Http\Request;
@@ -15,7 +16,10 @@ class ChatController extends Controller
     public function store(Request $request, Session $session){
         $message = $session->messages()->create(['content' => $request->content]);
         $message->chatForSender($session->id);
-        $message->chatForRecipient($session->id,$request->userTo);
+
+        $chat = $message->chatForRecipient($session->id, $request->userTo);
+
+        broadcast(new PrivateChatEvent($chat));
         return $message;
     }
 }
