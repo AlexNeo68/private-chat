@@ -9,6 +9,9 @@ class Chat extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+    protected $with = ['message'];
+
     public function message() {
        return $this->belongsTo(Message::class);
     }

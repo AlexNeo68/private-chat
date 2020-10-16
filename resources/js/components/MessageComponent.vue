@@ -33,7 +33,9 @@
 
     <div class="card-body" v-chat-scroll>
       <div v-for="(chat, index) in chats" :key="`chat-${index}`">
-        <div class="card-text">{{ chat.message }}</div>
+        <div class="card-text" :class="{ 'text-right': !chat.type }">
+          {{ chat.message }}
+        </div>
       </div>
     </div>
     <div class="card-footer">
@@ -44,6 +46,7 @@
             :disabled="block"
             class="form-control"
             placeholder="Type your message here ..."
+            v-model="message"
           />
         </div>
       </form>
@@ -58,44 +61,40 @@ export default {
     return {
       chats: [],
       block: false,
+      message: null,
     };
   },
   created() {
-    this.chats.push({ message: "Hello!" });
-    this.chats.push({ message: "Hi!" });
-    this.chats.push({ message: "How are you?" });
-    this.chats.push({ message: "Fine, and you?" });
-    this.chats.push({ message: "I`m fine too, thanks!" });
-    this.chats.push({ message: "I`s great!" });
-    this.chats.push({ message: "Hello!" });
-    this.chats.push({ message: "Hi!" });
-    this.chats.push({ message: "How are you?" });
-    this.chats.push({ message: "Fine, and you?" });
-    this.chats.push({ message: "I`m fine too, thanks!" });
-    this.chats.push({ message: "I`s great!" });
-    this.chats.push({ message: "Hello!" });
-    this.chats.push({ message: "Hi!" });
-    this.chats.push({ message: "How are you?" });
-    this.chats.push({ message: "Fine, and you?" });
-    this.chats.push({ message: "I`m fine too, thanks!" });
-    this.chats.push({ message: "I`s great!" });
-    this.chats.push({ message: "Hello!" });
-    this.chats.push({ message: "Hi!" });
-    this.chats.push({ message: "How are you?" });
-    this.chats.push({ message: "Fine, and you?" });
-    this.chats.push({ message: "I`m fine too, thanks!" });
-    this.chats.push({ message: "I`s great!" });
-    this.chats.push({ message: "Hello!" });
-    this.chats.push({ message: "Hi!" });
-    this.chats.push({ message: "How are you?" });
-    this.chats.push({ message: "Fine, and you?" });
-    this.chats.push({ message: "I`m fine too, thanks!" });
-    this.chats.push({ message: "I`s great!" });
-    this.chats.push({ message: "it is bottom" });
+    this.getChats();
   },
   methods: {
-    send() {
-      console.log("Send Ha Ha");
+    async getChats() {
+      try {
+        const res = (
+          await axios.get(`/sessions/${this.friend.session.id}/chats`)
+        ).data;
+        this.chats = res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async send() {
+      try {
+        const res = (
+          await axios.post(`/sessions/${this.friend.session.id}/chats`, {
+            content: this.message,
+            userTo: this.friend.id,
+          })
+        ).data;
+        this.chats.push({
+          message: this.message,
+          type: 0,
+          send_at: "just now",
+        });
+        this.message = null;
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 };

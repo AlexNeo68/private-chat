@@ -8,13 +8,17 @@
           <div class="card-body">
             <ul class="list-group">
               <li
-                class="list-group-item"
+                class="list-group-item d-flex justify-content-between align-items-center"
                 v-for="friend in friends"
                 :key="friend.id"
               >
                 <a href="#" @click.prevent="openSession(friend)">{{
                   friend.name
                 }}</a>
+                <i
+                  v-if="friend.online"
+                  class="fas fa-circle-notch text-success"
+                ></i>
               </li>
             </ul>
           </div>
@@ -46,6 +50,28 @@ export default {
   },
   created() {
     this.getFriends();
+    Echo.channel("Chat").listen("SessionEvent", (e) => {
+      let friend = this.friends.find((fr) => fr.id == e.session_by);
+      friend.session = e.session;
+    });
+    Echo.join(`Chat`)
+      .here((users) => {
+        this.friends.forEach((friend) => {
+          users.forEach((user) => {
+            if (user.id == friend.id) friend.online = true;
+          });
+        });
+      })
+      .joining((user) => {
+        this.friends.forEach((friend) => {
+          if (user.id == friend.id) friend.online = true;
+        });
+      })
+      .leaving((user) => {
+        this.friends.forEach((friend) => {
+          if (user.id == friend.id) friend.online = false;
+        });
+      });
   },
   methods: {
     openExistSession(friend) {

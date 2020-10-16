@@ -24,3 +24,5 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
 Route::post('sessions', [App\Http\Controllers\SessionController::class, 'store']);
+Route::get('sessions/{session}/chats', [App\Http\Controllers\ChatController::class, 'index']);
+Route::post('sessions/{session}/chats', [App\Http\Controllers\ChatController::class, 'store']);
