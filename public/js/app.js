@@ -1968,6 +1968,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "ChatComponent",
@@ -1990,6 +1995,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
 
       friend.session = e.session;
+
+      _this.listenEverySession(friend);
     });
     Echo.join("Chat").here(function (users) {
       _this.friends.forEach(function (friend) {
@@ -2008,9 +2015,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     });
   },
   methods: {
+    listenEverySession: function listenEverySession(friend) {
+      Echo["private"]("Chat.".concat(friend.session.id)).listen("PrivateChatEvent", function (e) {
+        if (!friend.session.open) {
+          friend.session.unreadMessageCount++;
+        }
+      });
+    },
     openExistSession: function openExistSession(friend) {
       this.closeAllSessions();
       friend.session.open = true;
+      friend.session.unreadMessageCount = 0;
     },
     openSession: function openSession(friend) {
       var _this2 = this;
@@ -2083,20 +2098,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 3:
                 res = _context2.sent.data;
                 _this3.friends = res.data;
-                _context2.next = 10;
+
+                _this3.friends.forEach(function (friend) {
+                  if (friend.session) _this3.listenEverySession(friend);
+                });
+
+                _context2.next = 11;
                 break;
 
-              case 7:
-                _context2.prev = 7;
+              case 8:
+                _context2.prev = 8;
                 _context2.t0 = _context2["catch"](0);
                 console.log(_context2.t0);
 
-              case 10:
+              case 11:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[0, 7]]);
+        }, _callee2, null, [[0, 8]]);
       }))();
     }
   }
@@ -2189,8 +2209,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   created: function created() {
     var _this = this;
 
+    this.readSession();
     this.getChats();
     Echo["private"]("Chat.".concat(this.friend.session.id)).listen("PrivateChatEvent", function (e) {
+      _this.readSession();
+
       _this.chats.push({
         message: e.chat.message.content,
         type: e.chat.type,
@@ -2199,7 +2222,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     });
   },
   methods: {
-    getChats: function getChats() {
+    readSession: function readSession() {
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
@@ -2210,11 +2233,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context.prev = 0;
                 _context.next = 3;
-                return axios.get("/sessions/".concat(_this2.friend.session.id, "/chats"));
+                return axios.get("/sessions/".concat(_this2.friend.session.id, "/read"));
 
               case 3:
                 res = _context.sent.data;
-                _this2.chats = res.data;
+                console.log(res);
                 _context.next = 10;
                 break;
 
@@ -2231,7 +2254,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee, null, [[0, 7]]);
       }))();
     },
-    send: function send() {
+    getChats: function getChats() {
       var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
@@ -2242,35 +2265,67 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context2.prev = 0;
                 _context2.next = 3;
-                return axios.post("/sessions/".concat(_this3.friend.session.id, "/chats"), {
-                  content: _this3.message,
-                  userTo: _this3.friend.id
-                });
+                return axios.get("/sessions/".concat(_this3.friend.session.id, "/chats"));
 
               case 3:
                 res = _context2.sent.data;
-
-                _this3.chats.push({
-                  message: _this3.message,
-                  type: 0,
-                  send_at: "just now"
-                });
-
-                _this3.message = null;
-                _context2.next = 11;
+                _this3.chats = res.data;
+                _context2.next = 10;
                 break;
 
-              case 8:
-                _context2.prev = 8;
+              case 7:
+                _context2.prev = 7;
                 _context2.t0 = _context2["catch"](0);
                 console.log(_context2.t0);
 
-              case 11:
+              case 10:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[0, 8]]);
+        }, _callee2, null, [[0, 7]]);
+      }))();
+    },
+    send: function send() {
+      var _this4 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
+        var res;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.prev = 0;
+                _context3.next = 3;
+                return axios.post("/sessions/".concat(_this4.friend.session.id, "/chats"), {
+                  content: _this4.message,
+                  userTo: _this4.friend.id
+                });
+
+              case 3:
+                res = _context3.sent.data;
+
+                _this4.chats.push({
+                  message: _this4.message,
+                  type: 0,
+                  send_at: "just now"
+                });
+
+                _this4.message = null;
+                _context3.next = 11;
+                break;
+
+              case 8:
+                _context3.prev = 8;
+                _context3.t0 = _context3["catch"](0);
+                console.log(_context3.t0);
+
+              case 11:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[0, 8]]);
       }))();
     }
   }
@@ -45497,7 +45552,14 @@ var render = function() {
                           }
                         }
                       },
-                      [_vm._v(_vm._s(friend.name))]
+                      [
+                        _vm._v(_vm._s(friend.name) + "\n                "),
+                        friend.session && friend.session.unreadMessageCount
+                          ? _c("span", { staticClass: "text-danger" }, [
+                              _vm._v(_vm._s(friend.session.unreadMessageCount))
+                            ])
+                          : _vm._e()
+                      ]
                     ),
                     _vm._v(" "),
                     friend.online

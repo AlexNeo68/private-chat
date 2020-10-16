@@ -12,9 +12,14 @@
                 v-for="friend in friends"
                 :key="friend.id"
               >
-                <a href="#" @click.prevent="openSession(friend)">{{
-                  friend.name
-                }}</a>
+                <a href="#" @click.prevent="openSession(friend)"
+                  >{{ friend.name }}
+                  <span
+                    class="text-danger"
+                    v-if="friend.session && friend.session.unreadMessageCount"
+                    >{{ friend.session.unreadMessageCount }}</span
+                  ></a
+                >
                 <i
                   v-if="friend.online"
                   class="fas fa-circle-notch text-success"
@@ -53,6 +58,7 @@ export default {
     Echo.channel("Chat").listen("SessionEvent", (e) => {
       let friend = this.friends.find((fr) => fr.id == e.session_by);
       friend.session = e.session;
+      this.listenEverySession(friend);
     });
     Echo.join(`Chat`)
       .here((users) => {
@@ -74,9 +80,20 @@ export default {
       });
   },
   methods: {
+    listenEverySession(friend) {
+      Echo.private(`Chat.${friend.session.id}`).listen(
+        "PrivateChatEvent",
+        (e) => {
+          if (!friend.session.open) {
+            friend.session.unreadMessageCount++;
+          }
+        }
+      );
+    },
     openExistSession(friend) {
       this.closeAllSessions();
       friend.session.open = true;
+      friend.session.unreadMessageCount = 0;
     },
     async openSession(friend) {
       if (friend.session) {
@@ -103,6 +120,9 @@ export default {
       try {
         const res = (await axios.get("/users")).data;
         this.friends = res.data;
+        this.friends.forEach((friend) => {
+          if (friend.session) this.listenEverySession(friend);
+        });
       } catch (error) {
         console.log(error);
       }

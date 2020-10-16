@@ -15,4 +15,8 @@ class Chat extends Model
     public function message() {
        return $this->belongsTo(Message::class);
     }
+
+    public function markAsRead(){
+       return $this->update(['read_at' => now()]);
+    }
 }

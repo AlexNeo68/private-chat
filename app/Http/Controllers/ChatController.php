@@ -22,4 +22,12 @@ class ChatController extends Controller
         broadcast(new PrivateChatEvent($chat));
         return $message;
     }
+
+    public function read(Session $session){
+        $chats = $session->chats()->whereNotIn('user_id', [auth()->user()->id])->where('read_at', null)->where('type', 0)->get();
+        foreach($chats as $chat){
+            $chat->markAsRead();
+        }
+        return $chats;
+    }
 }

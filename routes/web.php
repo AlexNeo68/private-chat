@@ -26,3 +26,4 @@ Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
 Route::post('sessions', [App\Http\Controllers\SessionController::class, 'store']);
 Route::get('sessions/{session}/chats', [App\Http\Controllers\ChatController::class, 'index']);
 Route::post('sessions/{session}/chats', [App\Http\Controllers\ChatController::class, 'store']);
+Route::get('sessions/{session}/read', [App\Http\Controllers\ChatController::class, 'read']);

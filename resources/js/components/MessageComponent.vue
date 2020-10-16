@@ -65,10 +65,12 @@ export default {
     };
   },
   created() {
+    this.readSession();
     this.getChats();
     Echo.private(`Chat.${this.friend.session.id}`).listen(
       "PrivateChatEvent",
       (e) => {
+        this.readSession();
         this.chats.push({
           message: e.chat.message.content,
           type: e.chat.type,
@@ -78,6 +80,16 @@ export default {
     );
   },
   methods: {
+    async readSession() {
+      try {
+        const res = (
+          await axios.get(`/sessions/${this.friend.session.id}/read`)
+        ).data;
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    },
     async getChats() {
       try {
         const res = (
