@@ -33,8 +33,14 @@
 
     <div class="card-body" v-chat-scroll>
       <div v-for="(chat, index) in chats" :key="`chat-${index}`">
-        <div class="card-text" :class="{ 'text-right': !chat.type }">
+        <div
+          class="card-text"
+          :class="{ 'text-right': !chat.type, 'text-success': chat.read_at }"
+        >
           {{ chat.message }}
+          <span v-if="chat.read_at" style="font-size: 9px; display: block">{{
+            chat.read_at
+          }}</span>
         </div>
       </div>
     </div>
@@ -70,11 +76,22 @@ export default {
     Echo.private(`Chat.${this.friend.session.id}`).listen(
       "PrivateChatEvent",
       (e) => {
-        this.readSession();
+        if (this.friend.session.open) this.readSession();
         this.chats.push({
+          id: e.chat.id,
           message: e.chat.message.content,
           type: e.chat.type,
           send_at: "just now",
+          read_at: null,
+        });
+      }
+    );
+    Echo.private(`Chat.${this.friend.session.id}`).listen(
+      "MessageReadEvent",
+      (e) => {
+        console.log(e.chat);
+        this.chats.forEach((chat) => {
+          if (chat.id == e.chat.id) chat.read_at = e.chat.read_at;
         });
       }
     );
@@ -85,7 +102,6 @@ export default {
         const res = (
           await axios.get(`/sessions/${this.friend.session.id}/read`)
         ).data;
-        console.log(res);
       } catch (error) {
         console.log(error);
       }
@@ -109,9 +125,11 @@ export default {
           })
         ).data;
         this.chats.push({
+          id: res,
           message: this.message,
           type: 0,
           send_at: "just now",
+          read_at: null,
         });
         this.message = null;
       } catch (error) {

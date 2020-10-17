@@ -2196,6 +2196,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "MessageComponent",
   props: ["friend"],
@@ -2212,12 +2218,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     this.readSession();
     this.getChats();
     Echo["private"]("Chat.".concat(this.friend.session.id)).listen("PrivateChatEvent", function (e) {
-      _this.readSession();
+      if (_this.friend.session.open) _this.readSession();
 
       _this.chats.push({
+        id: e.chat.id,
         message: e.chat.message.content,
         type: e.chat.type,
-        send_at: "just now"
+        send_at: "just now",
+        read_at: null
+      });
+    });
+    Echo["private"]("Chat.".concat(this.friend.session.id)).listen("MessageReadEvent", function (e) {
+      console.log(e.chat);
+
+      _this.chats.forEach(function (chat) {
+        if (chat.id == e.chat.id) chat.read_at = e.chat.read_at;
       });
     });
   },
@@ -2237,21 +2252,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 3:
                 res = _context.sent.data;
-                console.log(res);
-                _context.next = 10;
+                _context.next = 9;
                 break;
 
-              case 7:
-                _context.prev = 7;
+              case 6:
+                _context.prev = 6;
                 _context.t0 = _context["catch"](0);
                 console.log(_context.t0);
 
-              case 10:
+              case 9:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 7]]);
+        }, _callee, null, [[0, 6]]);
       }))();
     },
     getChats: function getChats() {
@@ -2306,9 +2320,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 res = _context3.sent.data;
 
                 _this4.chats.push({
+                  id: res,
                   message: _this4.message,
                   type: 0,
-                  send_at: "just now"
+                  send_at: "just now",
+                  read_at: null
                 });
 
                 _this4.message = null;
@@ -45710,8 +45726,20 @@ var render = function() {
         return _c("div", { key: "chat-" + index }, [
           _c(
             "div",
-            { staticClass: "card-text", class: { "text-right": !chat.type } },
-            [_vm._v("\n        " + _vm._s(chat.message) + "\n      ")]
+            {
+              staticClass: "card-text",
+              class: { "text-right": !chat.type, "text-success": chat.read_at }
+            },
+            [
+              _vm._v("\n        " + _vm._s(chat.message) + "\n        "),
+              chat.read_at
+                ? _c(
+                    "span",
+                    { staticStyle: { "font-size": "9px", display: "block" } },
+                    [_vm._v(_vm._s(chat.read_at))]
+                  )
+                : _vm._e()
+            ]
           )
         ])
       }),
