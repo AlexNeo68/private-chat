@@ -32,4 +32,10 @@ class ChatController extends Controller
         }
         return $chats;
     }
+
+    public function clear(Session $session){
+        $session->removeChatsAuthUser();
+        if(!$session->chats->count()) $session->removeMessages();
+        return response()->json('Chats removed', 204);
+    }
 }

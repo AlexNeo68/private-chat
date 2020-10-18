@@ -21,9 +21,7 @@
           <a class="dropdown-item" href="#" @click.prevent="block = !block">{{
             this.block ? "UnBlock" : "Block"
           }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="chats = []"
-            >Clear</a
-          >
+          <a class="dropdown-item" href="#" @click.prevent="clear">Clear</a>
         </div>
         <a href="#" @click.prevent="$emit('close')"
           ><i class="far fa-window-close"></i
@@ -97,6 +95,16 @@ export default {
     );
   },
   methods: {
+    async clear() {
+      try {
+        const res = (
+          await axios.delete(`/sessions/${this.friend.session.id}/clear`)
+        ).data;
+        this.chats = [];
+      } catch (error) {
+        console.log(error);
+      }
+    },
     async readSession() {
       try {
         const res = (

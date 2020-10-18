@@ -2200,8 +2200,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "MessageComponent",
   props: ["friend"],
@@ -2237,7 +2235,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     });
   },
   methods: {
-    readSession: function readSession() {
+    clear: function clear() {
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
@@ -2248,27 +2246,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context.prev = 0;
                 _context.next = 3;
-                return axios.get("/sessions/".concat(_this2.friend.session.id, "/read"));
+                return axios["delete"]("/sessions/".concat(_this2.friend.session.id, "/clear"));
 
               case 3:
                 res = _context.sent.data;
-                _context.next = 9;
+                _this2.chats = [];
+                _context.next = 10;
                 break;
 
-              case 6:
-                _context.prev = 6;
+              case 7:
+                _context.prev = 7;
                 _context.t0 = _context["catch"](0);
                 console.log(_context.t0);
 
-              case 9:
+              case 10:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 6]]);
+        }, _callee, null, [[0, 7]]);
       }))();
     },
-    getChats: function getChats() {
+    readSession: function readSession() {
       var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
@@ -2279,28 +2278,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context2.prev = 0;
                 _context2.next = 3;
-                return axios.get("/sessions/".concat(_this3.friend.session.id, "/chats"));
+                return axios.get("/sessions/".concat(_this3.friend.session.id, "/read"));
 
               case 3:
                 res = _context2.sent.data;
-                _this3.chats = res.data;
-                _context2.next = 10;
+                _context2.next = 9;
                 break;
 
-              case 7:
-                _context2.prev = 7;
+              case 6:
+                _context2.prev = 6;
                 _context2.t0 = _context2["catch"](0);
                 console.log(_context2.t0);
 
-              case 10:
+              case 9:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[0, 7]]);
+        }, _callee2, null, [[0, 6]]);
       }))();
     },
-    send: function send() {
+    getChats: function getChats() {
       var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
@@ -2311,37 +2309,69 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 _context3.prev = 0;
                 _context3.next = 3;
-                return axios.post("/sessions/".concat(_this4.friend.session.id, "/chats"), {
-                  content: _this4.message,
-                  userTo: _this4.friend.id
-                });
+                return axios.get("/sessions/".concat(_this4.friend.session.id, "/chats"));
 
               case 3:
                 res = _context3.sent.data;
+                _this4.chats = res.data;
+                _context3.next = 10;
+                break;
 
-                _this4.chats.push({
+              case 7:
+                _context3.prev = 7;
+                _context3.t0 = _context3["catch"](0);
+                console.log(_context3.t0);
+
+              case 10:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[0, 7]]);
+      }))();
+    },
+    send: function send() {
+      var _this5 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4() {
+        var res;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.prev = 0;
+                _context4.next = 3;
+                return axios.post("/sessions/".concat(_this5.friend.session.id, "/chats"), {
+                  content: _this5.message,
+                  userTo: _this5.friend.id
+                });
+
+              case 3:
+                res = _context4.sent.data;
+
+                _this5.chats.push({
                   id: res,
-                  message: _this4.message,
+                  message: _this5.message,
                   type: 0,
                   send_at: "just now",
                   read_at: null
                 });
 
-                _this4.message = null;
-                _context3.next = 11;
+                _this5.message = null;
+                _context4.next = 11;
                 break;
 
               case 8:
-                _context3.prev = 8;
-                _context3.t0 = _context3["catch"](0);
-                console.log(_context3.t0);
+                _context4.prev = 8;
+                _context4.t0 = _context4["catch"](0);
+                console.log(_context4.t0);
 
               case 11:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, null, [[0, 8]]);
+        }, _callee4, null, [[0, 8]]);
       }))();
     }
   }
@@ -45690,7 +45720,7 @@ var render = function() {
                   on: {
                     click: function($event) {
                       $event.preventDefault()
-                      _vm.chats = []
+                      return _vm.clear($event)
                     }
                   }
                 },

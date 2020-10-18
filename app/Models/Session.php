@@ -17,4 +17,14 @@ class Session extends Model
     public function messages(){
        return $this->hasMany(Message::class);
     }
+
+    public function removeChatsAuthUser(){
+       return $this->chats()->where('user_id', auth()->user()->id)->delete();
+    }
+
+    public function removeMessages(){
+       return $this->messages()->delete();
+    }
+
+
 }
