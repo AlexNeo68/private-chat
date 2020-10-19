@@ -2213,13 +2213,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "MessageComponent",
   props: ["friend"],
   data: function data() {
     return {
       chats: [],
-      message: null
+      message: null,
+      isTyping: false
     };
   },
   computed: {
@@ -2255,6 +2258,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     });
     Echo["private"]("Chat.".concat(this.friend.session.id)).listen("SessionBlockEvent", function (e) {
       _this.session.blocked = e.blocked;
+    });
+    Echo["private"]("Chat.".concat(this.friend.session.id)).listenForWhisper("typing", function (e) {
+      _this.isTyping = true;
+      setTimeout(function () {
+        _this.isTyping = false;
+      }, 2000);
     });
   },
   methods: {
@@ -2462,6 +2471,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee6, null, [[0, 8]]);
       }))();
+    }
+  },
+  watch: {
+    message: function message(value) {
+      if (value) {
+        Echo["private"]("Chat.".concat(this.friend.session.id)).whisper("typing", {
+          name: Auth.name
+        });
+      }
     }
   }
 });
@@ -45771,7 +45789,9 @@ var render = function() {
       [
         _c("span", [
           _c("span", { class: { "text-danger": _vm.session.blocked } }, [
-            _vm._v("\n        " + _vm._s(_vm.friend.name) + " "),
+            _vm._v("\n        " + _vm._s(_vm.friend.name) + "\n        "),
+            _vm.isTyping ? _c("span", [_vm._v(" is Typing ...")]) : _vm._e(),
+            _vm._v(" "),
             _vm.session.blocked ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
           ])
         ]),

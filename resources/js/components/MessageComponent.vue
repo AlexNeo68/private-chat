@@ -3,7 +3,9 @@
     <div class="card-header d-flex justify-content-between items-center">
       <span>
         <span :class="{ 'text-danger': session.blocked }">
-          {{ friend.name }} <span v-if="session.blocked">(Blocked)</span></span
+          {{ friend.name }}
+          <span v-if="isTyping"> is Typing ...</span>
+          <span v-if="session.blocked">(Blocked)</span></span
         >
       </span>
       <span>
@@ -78,6 +80,7 @@ export default {
     return {
       chats: [],
       message: null,
+      isTyping: false,
     };
   },
   computed: {
@@ -117,6 +120,15 @@ export default {
       "SessionBlockEvent",
       (e) => {
         this.session.blocked = e.blocked;
+      }
+    );
+    Echo.private(`Chat.${this.friend.session.id}`).listenForWhisper(
+      "typing",
+      (e) => {
+        this.isTyping = true;
+        setTimeout(() => {
+          this.isTyping = false;
+        }, 2000);
       }
     );
   },
@@ -190,6 +202,15 @@ export default {
         this.session.blocked_by = null;
       } catch (error) {
         console.log(error);
+      }
+    },
+  },
+  watch: {
+    message(value) {
+      if (value) {
+        Echo.private(`Chat.${this.friend.session.id}`).whisper("typing", {
+          name: Auth.name,
+        });
       }
     },
   },

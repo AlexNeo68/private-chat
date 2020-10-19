@@ -20,7 +20,10 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    <script>window.AuthId = {!! auth()->user()->id !!}</script>
+    <script>
+        window.AuthId = {!! optional(auth()->user())->id !!}
+        window.Auth = {!! auth()->user() !!}
+    </script>
 </head>
 <body>
     <div id="app">
