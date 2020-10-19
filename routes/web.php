@@ -28,3 +28,5 @@ Route::get('sessions/{session}/chats', [App\Http\Controllers\ChatController::cla
 Route::post('sessions/{session}/chats', [App\Http\Controllers\ChatController::class, 'store']);
 Route::get('sessions/{session}/read', [App\Http\Controllers\ChatController::class, 'read']);
 Route::delete('sessions/{session}/clear', [App\Http\Controllers\ChatController::class, 'clear']);
+Route::patch('sessions/{session}/block', [App\Http\Controllers\BlockController::class, 'block']);
+Route::patch('sessions/{session}/unblock', [App\Http\Controllers\BlockController::class, 'unblock']);

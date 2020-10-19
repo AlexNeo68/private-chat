@@ -2,8 +2,8 @@
   <div class="card chat-box">
     <div class="card-header d-flex justify-content-between items-center">
       <span>
-        <span :class="{ 'text-danger': block }">
-          {{ friend.name }} <span v-if="block">(Blocked)</span></span
+        <span :class="{ 'text-danger': session.blocked }">
+          {{ friend.name }} <span v-if="session.blocked">(Blocked)</span></span
         >
       </span>
       <span>
@@ -18,9 +18,22 @@
           <i class="fas fa-ellipsis-v"></i>
         </a>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="#" @click.prevent="block = !block">{{
-            this.block ? "UnBlock" : "Block"
-          }}</a>
+          <a
+            v-if="!session.blocked"
+            class="dropdown-item"
+            href="#"
+            @click.prevent="blockSession"
+          >
+            Block</a
+          >
+          <a
+            v-if="session.blocked && canUnBlockSession"
+            class="dropdown-item"
+            href="#"
+            @click.prevent="unBlockSession"
+          >
+            unBlock</a
+          >
           <a class="dropdown-item" href="#" @click.prevent="clear">Clear</a>
         </div>
         <a href="#" @click.prevent="$emit('close')"
@@ -47,7 +60,7 @@
         <div class="form-group">
           <input
             type="text"
-            :disabled="block"
+            :disabled="session.blocked"
             class="form-control"
             placeholder="Type your message here ..."
             v-model="message"
@@ -64,9 +77,16 @@ export default {
   data() {
     return {
       chats: [],
-      block: false,
       message: null,
     };
+  },
+  computed: {
+    session() {
+      return this.friend.session;
+    },
+    canUnBlockSession() {
+      return this.session.blocked_by == AuthId;
+    },
   },
   created() {
     this.readSession();
@@ -91,6 +111,12 @@ export default {
         this.chats.forEach((chat) => {
           if (chat.id == e.chat.id) chat.read_at = e.chat.read_at;
         });
+      }
+    );
+    Echo.private(`Chat.${this.friend.session.id}`).listen(
+      "SessionBlockEvent",
+      (e) => {
+        this.session.blocked = e.blocked;
       }
     );
   },
@@ -140,6 +166,28 @@ export default {
           read_at: null,
         });
         this.message = null;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async blockSession() {
+      try {
+        const res = (
+          await axios.patch(`/sessions/${this.friend.session.id}/block`)
+        ).data;
+        this.session.blocked = true;
+        this.session.blocked_by = AuthId;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async unBlockSession() {
+      try {
+        const res = (
+          await axios.patch(`/sessions/${this.friend.session.id}/unblock`)
+        ).data;
+        this.session.blocked = false;
+        this.session.blocked_by = null;
       } catch (error) {
         console.log(error);
       }

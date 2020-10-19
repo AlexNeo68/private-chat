@@ -26,5 +26,18 @@ class Session extends Model
        return $this->messages()->delete();
     }
 
+    public function block(){
+        $this->blocked = 1;
+        $this->blocked_by = auth()->user()->id;
+        $this->save();
+        return $this;
+    }
+
+    public function unBlock(){
+        $this->blocked = 0;
+        $this->blocked_by = null;
+        $this->save();
+        return $this;
+    }
 
 }

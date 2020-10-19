@@ -2200,15 +2200,35 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "MessageComponent",
   props: ["friend"],
   data: function data() {
     return {
       chats: [],
-      block: false,
       message: null
     };
+  },
+  computed: {
+    session: function session() {
+      return this.friend.session;
+    },
+    canUnBlockSession: function canUnBlockSession() {
+      return this.session.blocked_by == AuthId;
+    }
   },
   created: function created() {
     var _this = this;
@@ -2232,6 +2252,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       _this.chats.forEach(function (chat) {
         if (chat.id == e.chat.id) chat.read_at = e.chat.read_at;
       });
+    });
+    Echo["private"]("Chat.".concat(this.friend.session.id)).listen("SessionBlockEvent", function (e) {
+      _this.session.blocked = e.blocked;
     });
   },
   methods: {
@@ -2372,6 +2395,72 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             }
           }
         }, _callee4, null, [[0, 8]]);
+      }))();
+    },
+    blockSession: function blockSession() {
+      var _this6 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+        var res;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                _context5.next = 3;
+                return axios.patch("/sessions/".concat(_this6.friend.session.id, "/block"));
+
+              case 3:
+                res = _context5.sent.data;
+                _this6.session.blocked = true;
+                _this6.session.blocked_by = AuthId;
+                _context5.next = 11;
+                break;
+
+              case 8:
+                _context5.prev = 8;
+                _context5.t0 = _context5["catch"](0);
+                console.log(_context5.t0);
+
+              case 11:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 8]]);
+      }))();
+    },
+    unBlockSession: function unBlockSession() {
+      var _this7 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        var res;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                _context6.prev = 0;
+                _context6.next = 3;
+                return axios.patch("/sessions/".concat(_this7.friend.session.id, "/unblock"));
+
+              case 3:
+                res = _context6.sent.data;
+                _this7.session.blocked = false;
+                _this7.session.blocked_by = null;
+                _context6.next = 11;
+                break;
+
+              case 8:
+                _context6.prev = 8;
+                _context6.t0 = _context6["catch"](0);
+                console.log(_context6.t0);
+
+              case 11:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, null, [[0, 8]]);
       }))();
     }
   }
@@ -45681,9 +45770,9 @@ var render = function() {
       },
       [
         _c("span", [
-          _c("span", { class: { "text-danger": _vm.block } }, [
+          _c("span", { class: { "text-danger": _vm.session.blocked } }, [
             _vm._v("\n        " + _vm._s(_vm.friend.name) + " "),
-            _vm.block ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
+            _vm.session.blocked ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
           ])
         ]),
         _vm._v(" "),
@@ -45697,20 +45786,39 @@ var render = function() {
               attrs: { "aria-labelledby": "dropdownMenuButton" }
             },
             [
-              _c(
-                "a",
-                {
-                  staticClass: "dropdown-item",
-                  attrs: { href: "#" },
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      _vm.block = !_vm.block
-                    }
-                  }
-                },
-                [_vm._v(_vm._s(this.block ? "UnBlock" : "Block"))]
-              ),
+              !_vm.session.blocked
+                ? _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.blockSession($event)
+                        }
+                      }
+                    },
+                    [_vm._v("\n          Block")]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.session.blocked && _vm.canUnBlockSession
+                ? _c(
+                    "a",
+                    {
+                      staticClass: "dropdown-item",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.unBlockSession($event)
+                        }
+                      }
+                    },
+                    [_vm._v("\n          unBlock")]
+                  )
+                : _vm._e(),
               _vm._v(" "),
               _c(
                 "a",
@@ -45802,7 +45910,7 @@ var render = function() {
               staticClass: "form-control",
               attrs: {
                 type: "text",
-                disabled: _vm.block,
+                disabled: _vm.session.blocked,
                 placeholder: "Type your message here ..."
               },
               domProps: { value: _vm.message },

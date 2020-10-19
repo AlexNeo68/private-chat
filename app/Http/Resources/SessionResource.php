@@ -17,6 +17,9 @@ class SessionResource extends JsonResource
         return [
             'id' => $this->id,
             'open' => false,
+            'blocked' => !!$this->blocked,
+            'blocked_by' => $this->blocked_by,
+            'open' => false,
             'users' => [$this->user1_id, $this->user2_id],
             'unreadMessageCount' => $this->chats()
                 ->where('read_at', null)
